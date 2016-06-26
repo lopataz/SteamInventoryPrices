@@ -1,0 +1,50 @@
+{
+  "name": "Steam Inventory Prices",
+  "version": "1.0",
+  "description": "Simple price provider for Steam inventories",
+  "content_scripts": [
+    {
+      "matches": ["*://steamcommunity.com/tradeoffer/*", "*://steamcommunity.com/trade/*"],
+	  "css" : ["css/content_tradeoffer.css"],
+      "js": ["base/jquery-3.0.0.js", "js/content_modules.js",  "js/content.js", "js/content_tradeoffer.js"],
+	  "run_at": "document_end"
+    },
+	 {
+      "matches": [
+        "*://steamcommunity.com/id/*/inventory",
+        "*://steamcommunity.com/id/*/inventory/*",
+        "*://steamcommunity.com/profiles/*/inventory",
+        "*://steamcommunity.com/profiles/*/inventory/*"
+      ],
+      "css" : ["css/content_inventory.css"],
+      "js": ["base/jquery-3.0.0.js", "js/content_modules.js", "js/content.js", "js/content_inventory.js"],
+	  "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "options_page": "html/options.html",
+  "page_action" :
+  {
+    "default_icon" : "icon-19.png",
+    "default_title" : "SIP!"
+  },
+  "permissions" : [
+    "notifications",
+    "alarms",
+    "storage",
+    "background",
+    "declarativeContent",
+    "*://*.steamcommunity.com/*",
+    "*://*.steampowered.com/*",
+	"*://*.csg0.com/*"
+  ],
+  "icons" : {
+    "48" : "icon-48.png",
+    "128" : "icon-128.png"
+  },
+  "manifest_version": 2,
+  "homepage_url": "http://steamcommunity.com/groups/SteamInventoryPrices"
+}

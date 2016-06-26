@@ -1,0 +1,31 @@
+.options_cat{
+	margin: 20px 10px;
+	max-width:900px;
+}
+
+.listPP{
+	/*list-style-type: none;
+    padding: 0;
+    */
+	margin: 0;
+	
+}
+
+.PP_apps {
+color: #aaa; 
+font-weight: bold;
+font-size:1.6em;
+}
+
+li.provider {
+	font-size:16px;
+}
+
+.provider span.del{
+	cursor:pointer;
+}
+
+
+.provider:hover span.del:after{
+  content:  url('../img/Minus.png');
+}
