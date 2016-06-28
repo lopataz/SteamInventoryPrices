@@ -1,17 +1,50 @@
+.preloader{
+	position:absolute;
+	width:32px;
+	height:32px;
+	z-index:5;
+	top:-16px;
+	left:-16px;
+}
+
 .price2{
 text-align:right;
 background-color:rgba(235,235,255,0.75);
 position:absolute;
 top:0px;
 font-size:1.05em;
-color:#112133;
+color:#D2D2D2;
 font-family: "Bodoni MT", Didot, "Didot LT STD", "Book Antiqua", Garamond, "Times New Roman", serif;
 height:1.2em;
 margin-left: auto;
 margin-right: auto;
 left: 0;
 right: 0;
-color:black;
 padding-right:4px;
  border-bottom: 1px solid #2d2b2a;
+}
+
+.price2 .subname{
+float:left;
+margin:1px 2px;
+}
+
+
+
+#inventory_total{
+	float:left;
+	/*color:#a6801b;*/
+	font-size:1.2em;
+	height:26px;
+	font-family: Motiva Sans Light, Arial, Helvetica, sans-serif;
+	
+}
+
+#inventory_total span{
+	color:#a6801b;
+}
+
+#SIP_options{
+	position:relative;
+	margin:12px 0;
 }

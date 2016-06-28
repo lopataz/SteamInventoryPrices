@@ -40,15 +40,24 @@ var requestPrices = function(url, callback){
 
 var PP;
 
-function initDB(invInfo,index){
+function initDB(invInfo,indexP){
 	var appid = invInfo[2];
-	// chrome.storage.local.clear();
 	chrome.storage.sync.get({
 		PriceProviders: {} 
-	  }, function(items) {
-		PP = items.PriceProviders;
+	  }, function(syncedPP) {
+		PP = syncedPP.PriceProviders;
 	  if(appid in PP && PP[appid].providers.length>0){
-			var hashedurl=hashString(PP[appid].providers[index].request, "PP_");
+		  if(indexP===null){
+				$('#select_providers').empty();
+				PP[appid].providers.forEach(function(provider, index) {   
+					 $('#select_providers').append($("<option></option>").attr("value",index).text(provider.name || provider.request)); 
+				});
+				indexP=0;
+			}
+				
+			
+		  
+			var hashedurl=hashString(PP[appid].providers[indexP].request, "PP_");
 			chrome.storage.local.get(hashedurl, function(data) {
 				if (!chrome.runtime.lastError) {
 					if(typeof(data[hashedurl]) != "undefined" && Math.floor(Date.now() / 1000) - data[hashedurl].laststored < 3600 ){
@@ -59,7 +68,7 @@ function initDB(invInfo,index){
 							console.error("The price provider is broken.");
 						}
 					}else{
-						requestPrices(PP[appid].providers[index].request, function(){
+						requestPrices(PP[appid].providers[indexP].request, function(){
 							loadPrices(invInfo);
 						});
 						console.log("Prices just updated");
@@ -83,16 +92,17 @@ function initDB(invInfo,index){
 
 /// dom ///
 var nbTries=0,timeoutTries=10;
-var domInv;
+var invInfo, domInv;
 function process(){
 	
 	var tmpdomInv = $("#inventories .inventory_ctn:visible");
-	if(tmpdomInv.get(0) !== undefined && ( domInv === undefined || domInv.get(0).id !== tmpdomInv.get(0).id ) && !tmpdomInv.data("SIP") ){
+	if(tmpdomInv.get(0) !== undefined && ( domInv === undefined || domInv.get(0).id !== tmpdomInv.get(0).id ) /*&& !tmpdomInv.data("SIP")*/ ){
 		domInv = tmpdomInv;
-		var invInfo = domInv.get(0).id.split("_");
+		invInfo = domInv.get(0).id.split("_");
 		if(invInfo.length==4){
 			nbTries=0;
-			initDB(invInfo,0);
+			preDisplay();
+			initDB(invInfo,null);
 		}else{
 			nbTries++;
 			if(nbTries < 20 * timeoutTries){
@@ -115,6 +125,8 @@ function process(){
 
 var rgSortedInventory;
 function loadPrices(invInfo){
+	domInv.find(".preloader").remove();
+	domInv.prepend("<div class='preloader'><img src='"+chrome.extension.getURL('/img/preloader.gif')+"' alt='loading'/></div>");
 	var lastLoadedInv=null,found=-1;
 	chrome.storage.local.get("lastLoadedInv", function(data) {
 		if(typeof(data["lastLoadedInv"]) != "undefined" ){
@@ -143,6 +155,7 @@ function loadPrices(invInfo){
 			}catch(e){
 				console.log(e);
 			}
+			domInv.find(".preloader").remove();
 			if("rgInventory" in Inventory){
 				Inventory["invInfo"]=invInfo;
 				displayPrices(Inventory);
@@ -169,8 +182,10 @@ function loadPrices(invInfo){
 	
 }
 
+var total=0;
 function displayPrices(Inv){
 	if("rgInventory" in Inv){
+				total=0;
 				domInv.find('.price2').remove();
 				domInv.data( "SIP", true );
 				rgSortedInventory = { };
@@ -187,24 +202,34 @@ function displayPrices(Inv){
 					
 					// add infos
 					rgSortedInventory[pos].name = rgItem.market_hash_name || rgItem.market_name || rgItem.name;
-					var color =searchasso(rgItem["tags"],"color");
-					rgSortedInventory[pos].color = hexToRgb(color===""?"ebebff":color);
+					rgSortedInventory[pos].color = ((color = searchasso(rgItem["tags"],"color")) != "" ? hexToRgb(color) :{r:219,g:219,b:238, luma:0});
+					rgSortedInventory[pos].subname =(Inv.invInfo[2]=="730" && (subname = rgSortedInventory[pos].name.match(/\((.*)\)/)) !== null? subname[1].replace(/\W*(\w)\w*/g, '$1').toUpperCase() : "" );
 					
-					// add price to dom
+					// DOM
 					var domItem="#item"+Inv.invInfo[2]+"_"+Inv.invInfo[3]+"_"+rgSortedInventory[pos].id;
+						
+					// change warning
+					domInv.find(domItem+" .slot_app_fraudwarning").css({ "bottom": "1px","top":"auto" });
+					// add price to dom
 					if(InvPrices.prices && Inv.invInfo[2] in InvPrices.prices && rgSortedInventory[pos].name in InvPrices.prices[Inv.invInfo[2]]){
 						var price = InvPrices.prices[Inv.invInfo[2]][rgSortedInventory[pos].name]["median"];
-						domInv.find(domItem).prepend("<div class='price2' style='background-color:rgba("+rgSortedInventory[pos].color+",0.70)'>"+(price !== undefined ?"$"+price:"-")+"</div>");
-					}	
+						total+=price;
+						domInv.find(domItem).prepend("<div class='price2' data-price='"+price+"' style='background-color:rgba("+rgSortedInventory[pos].color.rgb
+									+",0.70);"+(rgSortedInventory[pos].color.luma>128?"color:black;" :"")+"'>"
+									+"<span class='subname'>"+rgSortedInventory[pos].subname+"</span>"
+									+(price !== undefined ?"$"+price:"-")+"</div>");
+					}
+					
 				}
+				postDisplay();
 			}else{
 				console.log("Steam might be down");
 			}
 }
 
-
+$(document).ready(function(){
 process();
-
+});
 
 
 

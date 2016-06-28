@@ -22,7 +22,7 @@ var changeStatus = function(msg){
 	status.textContent = msg;
 			setTimeout(function() {
 			  status.textContent = '';
-			}, 750);
+			}, 1250);
 	
 };
 
@@ -35,7 +35,7 @@ var initPP = function(PP){
 			  var add_pps="";
 			  
 			  PP[key].providers.forEach(function(provider){
-				  add_pps+="<li class='provider' data-request='"+provider.request+"' data-appid='"+key+"' ><span>"+htmlEntities(provider.request)+"</span> <span class='del'></span></li>"
+				  add_pps+="<li class='provider' data-request='"+provider.request+"' data-appid='"+key+"' ><span>"+htmlEntities(provider.request)+"</span> <span class='Up'></span> <span class='Down'></span> <span class='del'></span></li>"
 			  });
 			  
 			  if(add_pps !=""){
@@ -79,28 +79,37 @@ function save_PP() {
 		}catch(e){
 			console.log(e);
 		}
-		
 		if(InvPrices && "prices" in InvPrices){
+			var haschanged=false;
+			var tmpPP=PriceProviders;
 			for (var appid in InvPrices.prices) {
+				if(!/^\d+$/.test(appid)){haschanged=false;break;} 
 				if (InvPrices.prices.hasOwnProperty(appid) && typeof InvPrices.prices[appid] === 'object' ){
 					var insPP = {"request":newPP};
 					if(typeof(InvPrices.name)=="string") insPP.name = InvPrices.name.substring(0,40);
 					if(typeof(InvPrices.approvedids)=="object") insPP.approvedids = InvPrices.approvedids.slice(0,64);
-					 if(appid in PriceProviders && searcharray(PriceProviders[appid], "request", newPP)== -1 ){
-						PriceProviders[appid].providers.push(insPP);
+					 if(appid in tmpPP && searcharray(tmpPP[appid], "request", newPP)== -1 ){
+						tmpPP[appid].providers.push(insPP);
+						haschanged=true;
 					  }else if(/^\d+$/.test(appid)){
-						PriceProviders[appid] = {providers:[insPP]};
+						tmpPP[appid] = {providers:[insPP]};
+						haschanged=true;
 					  }
 					 
 				}else if(InvPrices.prices.hasOwnProperty(appid)){
 					changeStatus("The price provider structure is broken.");
 				}
 			}
-			syncPP(function(){
-				document.getElementById('newPP').value="";
-				changeStatus("Successful");
-				initPP(PriceProviders);
-			});
+			if(haschanged){
+				PriceProviders = tmpPP;
+				syncPP(function(){
+					document.getElementById('newPP').value="";
+					changeStatus("Successful");
+					initPP(PriceProviders);
+				});
+			}else{
+				changeStatus("The price provider structure is broken.");
+			}
 			
 		}else{
 			changeStatus("Can't add this Price provider.");
@@ -128,6 +137,37 @@ function restore_options() {
 
 
 $("#addPP").click(save_PP);
+
+$("#clearCache").click(function(){
+	chrome.storage.local.clear();
+	changeStatus("Cache cleared!");
+	});
+
+$("#resetOptions").click(function(){
+	
+	var xhr = new XMLHttpRequest();
+	var newPP="https://csg0.com/api/defaultProviders.json";
+		xhr.open("GET", newPP, true);
+		xhr.onreadystatechange = function() {
+		  if (xhr.readyState == 4) {
+			// JSON.parse does not evaluate scripts.
+			var resp;
+			try{
+				resp = JSON.parse(xhr.responseText);
+			}catch(e){
+				console.log(e);
+			}
+			
+			if(resp){
+				PriceProviders = resp;
+				chrome.storage.sync.set({"PriceProviders": resp });
+				initPP(PriceProviders);
+			}
+			
+		}
+		}
+		xhr.send();	
+});
 	
 $("#price_providers").on("click",".del",function(){
 		
@@ -147,7 +187,6 @@ $("#price_providers").on("click",".del",function(){
 				if(PriceProviders[appid].providers.length==0) delete PriceProviders[appid];
 					
 				syncPP(function(){
-					changeStatus("Successful");
 					initPP(PriceProviders);
 				 });
 			}
@@ -158,6 +197,59 @@ $("#price_providers").on("click",".del",function(){
 		
 		
 });
+
+$("#price_providers").on("click",".Up",function(){
+		var appid = $(this).closest(".provider").data( "appid" );
+		var request = $(this).closest(".provider").data( "request" );
+		
+		if(appid in PriceProviders){
+			var found=-1;
+			PriceProviders[appid].providers.forEach(function(provider,index){
+					if(provider.request == request){
+						found=index;
+					}
+				});
+			if(found>0){
+				var tmpPP = PriceProviders[appid].providers[found];
+				PriceProviders[appid].providers[found] = PriceProviders[appid].providers[found-1];
+				PriceProviders[appid].providers[found-1] = tmpPP;
+				syncPP(function(){
+					initPP(PriceProviders);
+				 });
+			}
+			
+		}else{
+			changeStatus("Error");
+		}
+		
+});
+
+$("#price_providers").on("click",".Down",function(){
+		var appid = $(this).closest(".provider").data( "appid" );
+		var request = $(this).closest(".provider").data( "request" );
+		
+		if(appid in PriceProviders){
+			var found=-1;
+			PriceProviders[appid].providers.forEach(function(provider,index){
+					if(provider.request == request){
+						found=index;
+					}
+				});
+			if(found<PriceProviders[appid].providers.length-1){
+				var tmpPP = PriceProviders[appid].providers[found+1];
+				PriceProviders[appid].providers[found+1] = PriceProviders[appid].providers[found];
+				PriceProviders[appid].providers[found] = tmpPP;
+				syncPP(function(){
+					initPP(PriceProviders);
+				 });
+			}
+			
+		}else{
+			changeStatus("Error");
+		}
+		
+});
+
 
 	restore_options();
 });

@@ -1,3 +1,9 @@
+#status{
+	height:20px;
+	font-weight:bold;
+	color:blue;
+}
+
 .options_cat{
 	margin: 20px 10px;
 	max-width:900px;
@@ -21,11 +27,18 @@ li.provider {
 	font-size:16px;
 }
 
-.provider span.del{
+.provider span.del,span.Up,span.Down {
 	cursor:pointer;
 }
 
-
 .provider:hover span.del:after{
   content:  url('../img/Minus.png');
+}
+
+.listPP .provider:not(:last-child):hover span.Down:after{
+  content:  url('../img/Down.png');
+}
+
+.listPP .provider:not(:first-child):hover span.Up:after{
+  content:  url('../img/Up.png');
 }

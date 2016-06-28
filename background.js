@@ -26,8 +26,32 @@ chrome.runtime.onInstalled.addListener(function(details) {
   
   
 if(details.reason == "install"){
-	var default_PP= {"730":{"providers":[{"request":"https://csg0.com/api/dbskins.php"}]}};
-	chrome.storage.sync.set({"PriceProviders": default_PP });
+	chrome.storage.sync.clear();
+	chrome.storage.local.clear();
+	var newPP="https://csg0.com/api/defaultProviders.json";
+	var default_PP ={"440":{"providers":[{"request":"https://csg0.com/api/dbskins_tf2.php", "name":"Csg0.com (tf2)"}]},"730":{"providers":[{"request":"https://csg0.com/api/dbskins.php", "name":"Csg0.com"}]}};
+	chrome.storage.sync.set({"PriceProviders": default_PP },function(){
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", newPP, true);
+		xhr.onreadystatechange = function() {
+		  if (xhr.readyState == 4) {
+			// JSON.parse does not evaluate scripts.
+				var resp;
+				try{
+					resp = JSON.parse(xhr.responseText);
+				}catch(e){
+					console.log(e);
+				}
+				
+				if(resp){
+					chrome.storage.sync.set({"PriceProviders": resp });
+				}
+			
+			}
+		}
+		xhr.send();		
+	});
+	
 }else if(details.reason == "update"){
 	var thisVersion = chrome.runtime.getManifest().version;
 	console.log("Updated from " + details.previousVersion + " to " + thisVersion + "!");
