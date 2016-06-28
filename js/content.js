@@ -186,6 +186,7 @@ var total=0;
 function displayPrices(Inv){
 	if("rgInventory" in Inv){
 				total=0;
+				var body=$("body");
 				domInv.find('.price2').remove();
 				domInv.data( "SIP", true );
 				rgSortedInventory = { };
@@ -209,19 +210,19 @@ function displayPrices(Inv){
 					var domItem="#item"+Inv.invInfo[2]+"_"+Inv.invInfo[3]+"_"+rgSortedInventory[pos].id;
 						
 					// change warning
-					domInv.find(domItem+" .slot_app_fraudwarning").css({ "bottom": "1px","top":"auto" });
+					body.find(domItem+" .slot_app_fraudwarning").css({ "bottom": "1px","top":"auto" });
 					// add price to dom
 					if(InvPrices.prices && Inv.invInfo[2] in InvPrices.prices && rgSortedInventory[pos].name in InvPrices.prices[Inv.invInfo[2]]){
 						var price = InvPrices.prices[Inv.invInfo[2]][rgSortedInventory[pos].name]["median"];
 						total+=price;
-						domInv.find(domItem).prepend("<div class='price2' data-price='"+price+"' style='background-color:rgba("+rgSortedInventory[pos].color.rgb
+						body.find(domItem).prepend("<div class='price2' data-price='"+price+"' style='background-color:rgba("+rgSortedInventory[pos].color.rgb
 									+",0.70);"+(rgSortedInventory[pos].color.luma>128?"color:black;" :"")+"'>"
 									+"<span class='subname'>"+rgSortedInventory[pos].subname+"</span>"
 									+(price !== undefined ?"$"+price:"-")+"</div>");
 					}
 					
 				}
-				postDisplay();
+				if( postDisplay !== undefined) postDisplay();
 			}else{
 				console.log("Steam might be down");
 			}

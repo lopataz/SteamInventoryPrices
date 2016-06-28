@@ -1,6 +1,6 @@
 {
   "name": "Steam Inventory Prices",
-  "version": "1.1.0",
+  "version": "1.1.0.1",
   "description": "Simple price provider for Steam inventories",
   "content_scripts": [
     {

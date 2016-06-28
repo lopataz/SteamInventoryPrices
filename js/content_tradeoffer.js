@@ -1,10 +1,14 @@
-function postDisplay(){
+
+	
 $("#trade_total_yours").remove();
 $("#trade_total_theirs").remove();
 $("#trade_yours .trade_item_box").after("<div id='trade_total_yours' class='trade_total' >Total: <span>$0.00</span></div><div style='clear: right;'></div>");
 $("#trade_theirs .trade_item_box").after("<div id='trade_total_theirs' class='trade_total' >Total: <span>$0.00</span></div><div style='clear: right;'></div>");
-}
-postDisplay();
+
+function postDisplay(){
+	recalcTotal($("#trade_yours"));
+	recalcTotal($("#trade_theirs"));
+	}
 
 function preDisplay(){
 $("#SIP_options").remove();
@@ -22,6 +26,14 @@ $('.trade_left').on('change','#select_providers', function (e) {
 	initDB(invInfo,parseInt(this.value));
 });
 	
+function recalcTotal(selector){
+	var tmptotal=0;
+	selector.find(".item").each(function(index){
+		tmptotal+= ( (price = $( this ).find(".price2").data("price")) !== undefined?parseFloat(price):0);
+	});
+	selector.find(".trade_total span").text("$"+tmptotal.toFixed(2));
+}
+	
 	
 var target1 = document.querySelector('#your_slots');
 var target2 = document.querySelector('#their_slots');
@@ -31,15 +43,11 @@ var observer = new WebKitMutationObserver(function(mutations) {
 			/*console.log("Success");
 			console.log(mutation);*/
 			if($.contains( target1, mutation.target )){
-				var selector= $("#trade_yours");
+				recalcTotal($("#trade_yours"));
 			}else{
-				var selector= $("#trade_theirs");
+				recalcTotal($("#trade_theirs"));
 			}
-			var tmptotal=0;
-			selector.find(".item").each(function(index){
-				tmptotal+= ( (price = $( this ).find(".price2").data("price")) !== undefined?parseFloat(price):0);
-			});
-			selector.find(".trade_total span").text("$"+tmptotal.toFixed(2));
+			
 			
 		}
       
