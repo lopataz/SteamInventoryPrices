@@ -10,6 +10,20 @@ function postDisplay(){
 	recalcTotal($("#trade_theirs"));
 	}
 
+function checkTheirs(){
+	var testitem = $("#their_slots").find(".item").find("a").attr("href");
+	if(typeof(testitem) == "string"){
+		var invVals = testitem.match(/steamcommunity.com\/(.*)\/(.*)\/(.*)\/#([\d]+)_([\d]+)/i);
+		if(invVals.length ==6)
+			loadPrices([invVals[3], invVals[2], invVals[4], invVals[5], invVals[1] , true]);
+	}
+}
+
+$(document).ready(function(){
+	setTimeout(checkTheirs,1000);
+});
+
+
 function preDisplay(){
 $("#SIP_options").remove();
 $('.trade_left').append('<div id="SIP_options">'
@@ -23,7 +37,7 @@ $('.trade_left').append('<div id="SIP_options">'
 
 $('.trade_left').on('change','#select_providers', function (e) {
     var optionSelected = $("option:selected", this);
-	initDB(invInfo,parseInt(this.value));
+	initDB(invInfoBase,parseInt(this.value));
 });
 	
 function recalcTotal(selector){

@@ -14,7 +14,7 @@ $('.inventory_page_left  > div:last').before('<div id="SIP_options"  >'
 
 $('.inventory_page_left').on('change','#select_providers', function (e) {
     var optionSelected = $("option:selected", this);
-	initDB(invInfo,parseInt(this.value));
+	initDB(invInfoBase,parseInt(this.value));
 });
 
 

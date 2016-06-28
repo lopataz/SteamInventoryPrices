@@ -92,15 +92,19 @@ function initDB(invInfo,indexP){
 
 /// dom ///
 var nbTries=0,timeoutTries=10;
-var invInfo, domInv;
+var invInfoBase, domInv;
 function process(){
 	
 	var tmpdomInv = $("#inventories .inventory_ctn:visible");
 	if(tmpdomInv.get(0) !== undefined && ( domInv === undefined || domInv.get(0).id !== tmpdomInv.get(0).id ) /*&& !tmpdomInv.data("SIP")*/ ){
 		domInv = tmpdomInv;
-		invInfo = domInv.get(0).id.split("_");
+		var invInfo = domInv.get(0).id.split("_");
 		if(invInfo.length==4){
 			nbTries=0;
+			
+			invInfoBase=invInfo;
+			invInfo.push("profiles");
+			
 			preDisplay();
 			initDB(invInfo,null);
 		}else{
@@ -145,7 +149,7 @@ function loadPrices(invInfo){
 	});
 	
 	var xhr = new XMLHttpRequest();
-	xhr.open("GET", "https://steamcommunity.com/profiles/"+invInfo[1]+"/"+invInfo[0]+"/json/"+invInfo[2]+"/"+invInfo[3], true);
+	xhr.open("GET", "https://steamcommunity.com/"+invInfo[4]+"/"+invInfo[1]+"/"+invInfo[0]+"/json/"+invInfo[2]+"/"+invInfo[3], true);
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == 4) {
 			// JSON.parse does not evaluate scripts.
@@ -187,7 +191,8 @@ function displayPrices(Inv){
 	if("rgInventory" in Inv){
 				total=0;
 				var body=$("body");
-				domInv.find('.price2').remove();
+				if(Inv.invInfo.length<=5)
+					domInv.find('.price2').remove();
 				domInv.data( "SIP", true );
 				rgSortedInventory = { };
 				
