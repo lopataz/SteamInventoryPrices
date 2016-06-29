@@ -138,7 +138,6 @@ function loadPrices(invInfo){
 			for(var i=0; i < data["lastLoadedInv"].length; i++){
 				if(data["lastLoadedInv"][i].success && data["lastLoadedInv"][i].invInfo.toString() === invInfo.toString()){
 					displayPrices(data["lastLoadedInv"][i]);
-					found=i;
 					break;
 				}
 			}
@@ -164,8 +163,19 @@ function loadPrices(invInfo){
 				Inventory["invInfo"]=invInfo;
 				displayPrices(Inventory);
 				if(lastLoadedInv && lastLoadedInv !== null ){
-					if(found >= 0){
+					for(var i=0; i < lastLoadedInv.length; i++){
+						if(lastLoadedInv[i].success && lastLoadedInv[i].invInfo.toString() === invInfo.toString()){
+							found=i;
+							break;
+						}
+					}
+					if(found == 0){
 						lastLoadedInv[found]=Inventory;
+					}else if(found > 0){
+						var lastLoadedTmp = lastLoadedInv[0];
+						lastLoadedInv[0] = Inventory;
+						lastLoadedInv[found] = lastLoadedTmp;
+					
 					}else{
 						lastLoadedInv = Array.prototype.slice.call(lastLoadedInv);
 						lastLoadedInv.unshift(Inventory);
