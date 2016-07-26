@@ -219,7 +219,7 @@ function displayPrices(Inv){
 					// add infos
 					rgSortedInventory[pos].name = rgItem.market_hash_name || rgItem.market_name || rgItem.name;
 					rgSortedInventory[pos].color = ((color = searchasso(rgItem["tags"],"color")) != "" ? hexToRgb(color) :{r:219,g:219,b:238, luma:0});
-					rgSortedInventory[pos].subname =(Inv.invInfo[2]=="730" && (subname = rgSortedInventory[pos].name.match(/\((.*)\)/)) !== null? subname[1].replace(/\W*(\w)\w*/g, '$1').toUpperCase() : "" );
+					rgSortedInventory[pos].subname =(Inv.invInfo[2]=="730" && (subname = rgSortedInventory[pos].name.match(/\((.*)\)$/)) !== null? subname[1].replace(/\W*(\w)\w*/g, '$1').toUpperCase() : "" );
 					
 					// DOM
 					var domItem="#item"+Inv.invInfo[2]+"_"+Inv.invInfo[3]+"_"+rgSortedInventory[pos].id;

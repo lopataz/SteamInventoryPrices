@@ -1,7 +1,7 @@
 $(document).ready(function(){
 
 
-var PriceProviders;
+var PriceProviders= {};
 //////////////////////////////
 
 var searcharray=function(a,r,i){
